@@ -1,4 +1,10 @@
 import * as blessed from 'blessed';
+import CubeTimer, { TickEvent, EventType } from 'can-cube-timer';
+import { formatTime } from './utils';
+
+const timer = new CubeTimer({
+  interval: 10,
+});
 
 const screen = blessed.screen({
   smartCSR: true,
@@ -6,24 +12,31 @@ const screen = blessed.screen({
 
 screen.title = "Can's Cubing Timer";
 
-const timerBox = blessed.box({
+const timerBox = blessed.text({
   top: 'center',
   left: 'center',
-  width: '100%',
-  height: '50%',
-  content: '01:00',
+  width: 'shrink',
+  align: 'right',
+  height: 'shrink',
+  content: 'test',
   tags: true,
-  border: { type: 'line' },
 });
 
 screen.append(timerBox);
+screen.cursorColor('#292D3E');
 
-timerBox.key('space', () => {
-  timerBox.setContent('Space pressed!');
+timer.on(EventType.Tick, (event: TickEvent) => {
+  timerBox.setContent(`${formatTime(event.time)}`);
+  screen.render();
+});
+
+screen.key('return', () => {
+  timer.start();
   screen.render();
 });
 
 screen.key(['escape', 'q', 'C-c'], () => {
+  timer.stop();
   return process.exit(0);
 });
 
